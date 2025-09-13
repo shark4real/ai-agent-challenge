@@ -1,71 +1,32 @@
 import pandas as pd
-import pdfplumber
+from pdfplumber import pdf2calc
+
+def extract_table(page):
+    tables = page.extract_tables()
+    if tables:
+        return tables[0]
+    else:
+        return None
+
+def extract_values(row):
+    return row if len(row) >= 6 else ['', '', '', '']
 
 def parse(pdf_path: str) -> pd.DataFrame:
-    # Initialize lists to store data
-    dates = []
-    descriptions = []
-    debit_amounts = []
-    credit_amounts = []
-    balances = []
-
-    # Read the PDF
     with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            # Get text from the page
-            text = page.extract_text()
-
-            # Split the text into lines
-            lines = text.split('\n')
-
-            # Iterate over the lines
-            for line in lines:
-                # Split the line into parts
-                parts = line.strip().split()
-
-                # Check if the line contains a date
-                if len(parts) > 3 and parts[0].isdigit():
-                    # Extract the date
-                    date = ' '.join(parts[:3])
-
-                    # Extract the description
-                    description = ' '.join(parts[3:])
-
-                    # Extract the debit amount
-                    debit_amount = ""
-                    for word in parts:
-                        if word.replace('.','',1).replace('-','',1).isdigit():
-                            debit_amount += word + ' '
-
-                    # Extract the credit amount
-                    credit_amount = ""
-                    for word in parts:
-                        if word.replace('.','',1).replace('-','',1).isdigit() and debit_amount == "":
-                            credit_amount += word + ' '
-
-                    # Extract the balance
-                    balance = ""
-                    for word in parts:
-                        if word.replace('.','',1).replace('-','',1).isdigit() and credit_amount == "":
-                            balance += word + ' '
-
-                    # Add the data to the lists
-                    dates.append(date)
-                    descriptions.append(description.strip())
-                    debit_amounts.append(debit_amount.strip())
-                    credit_amounts.append(credit_amount.strip())
-                    balances.append(balance.strip())
-
-    # Create the DataFrame
-    df = pd.DataFrame({
-        'Date': dates,
-        'Description': descriptions,
-        'Debit Amt': debit_amounts,
-        'Credit Amt': credit_amounts,
-        'Balance': balances
-    })
-
-    # Fill missing values with ""
-    df = df.fillna('')
-
-    return df
+        pages = list(pdf.pages)
+        if not pages:
+            return pd.DataFrame(columns=['Date', 'Description', 'Debit Amt', 'Credit Amt', 'Balance'])
+        
+        table = extract_table(pages[0])
+        if table is not None:
+            table = table[1:]
+            extracted_table = [extract_values(row) for row in table]
+            df = pd.DataFrame(extracted_table, columns=['Date', 'Description', 'Debit Amt', 'Credit Amt', 'Balance'])
+            df['Date'] = df['Date'].fillna("")
+            df['Description'] = df['Description'].fillna("")
+            df['Debit Amt'] = df['Debit Amt'].fillna("")
+            df['Credit Amt'] = df['Credit Amt'].fillna("")
+            df['Balance'] = df['Balance'].fillna("")
+            return df
+        else:
+            return pd.DataFrame(columns=['Date', 'Description', 'Debit Amt', 'Credit Amt', 'Balance'])
