@@ -1,7 +1,7 @@
-🤖 AutoParser AI
+# 🤖 AutoParser AI
 An autonomous AI agent that automatically writes, tests, and self-corrects Python code to parse bank statement PDFs. This project leverages generative AI to turn unstructured PDF data into clean, structured output with minimal human intervention.
 
-✨ Key Features
+# ✨ Key Features
 🤖 Autonomous Operation: A full generate -> test -> self-correct loop that runs without manual input.
 
 🧠 Dual AI Backends: Utilizes both Gemini for deep reasoning and Groq for high-speed generation.
@@ -12,7 +12,7 @@ An autonomous AI agent that automatically writes, tests, and self-corrects Pytho
 
 🚀 CLI-Driven: Simple and easy to run directly from your terminal.
 
-⚙️ How It Works
+# ⚙️ How It Works
 The agent follows a simple yet powerful iterative loop. When you run it, it identifies the target bank and initiates a cycle to create a working parser.
 
 The Generate-and-Test Loop:
@@ -49,7 +49,7 @@ Test: Compare the parser's output with the ground-truth CSV file.
 
 Fix: If the test fails, refine the approach and retry the loop.
 
-🚀 Getting Started: 5-Step Setup
+# 🚀 Getting Started: 5-Step Setup
 Follow these steps to get the agent running in under a minute.
 
 1. Clone the Repository
@@ -94,7 +94,7 @@ python agent.py --target icici
 
 The agent will now begin its autonomous loop. You can replace icici with any other bank name that has a corresponding sample folder in /data.
 
-🧪 Testing
+# 🧪 Testing
 While the agent runs tests automatically, you can also run them manually on any existing parser.
 
 pytest
@@ -102,7 +102,7 @@ pytest
 
 A successful run will show that all tests passed for the available parsers.
 
-📂 Project Structure
+# 📂 Project Structure
 .
 ├── agent.py                 # The main autonomous agent script
 ├── custom_parsers/          # Directory for all auto-generated parsers
