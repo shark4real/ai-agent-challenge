@@ -7,37 +7,30 @@ def parse_pdf(pdf_path: str) -> list[dict]:
             for page in pdf.pages:
                 text += page.extract_text()
 
-            lines = text.splitlines()
+            lines = text.split('\n')
             transactions = []
-            transaction = {}
+            started = False
             for line in lines:
-                parts = line.split()
-                if len(parts) > 3 and any(char.isdigit() for char in parts[0]):
-                    if transaction:
-                        transactions.append(transaction)
-                    transaction = {}
-                    try:
-                        transaction['Date'] = parts[0] + " " + parts[1]
-                        description_start = 2
-                        if parts[2].lower() in ['dr', 'cr']:
-                            description_start = 3
-                        transaction['Description'] = " ".join(parts[description_start:-2])
-                        if parts[-2].lower() == 'dr':
-                            transaction['Debit Amt'] = parts[-1]
-                            transaction['Credit Amt'] = ""
-                        elif parts[-2].lower() == 'cr':
-                            transaction['Credit Amt'] = parts[-1]
-                            transaction['Debit Amt'] = ""
-                        else:
-                            transaction['Debit Amt'] = ""
-                            transaction['Credit Amt'] = ""
-                        transaction['Balance'] = ""
+                line = line.strip()
+                if "Date" in line and "Description" in line and "Debit Amt" in line and "Credit Amt" in line and "Balance" in line:
+                    started = True
+                    continue
+                if started and line:
+                    parts = line.split()
+                    if len(parts) >= 5:
+                        date_str = " ".join(parts[:2])
+                        description = " ".join(parts[2:-3])
+                        debit = parts[-3] if parts[-3].replace(".","").isdigit() else ""
+                        credit = parts[-2] if parts[-2].replace(".","").isdigit() else ""
+                        balance = parts[-1]
+                        transactions.append({
+                            'Date': date_str,
+                            'Description': description,
+                            'Debit Amt': debit,
+                            'Credit Amt': credit,
+                            'Balance': balance
+                        })
 
-                    except (IndexError, ValueError):
-                        pass
-
-            if transaction:
-                transactions.append(transaction)
             return transactions
     except FileNotFoundError:
         return []

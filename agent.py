@@ -3,7 +3,7 @@
 An AI-powered agent to automatically generate, test, and validate
 Python parsers for bank statement PDFs.
 """
-
+# Imports
 import argparse
 import subprocess
 import sys
@@ -12,17 +12,18 @@ import csv
 import importlib.util
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-
 import google.generativeai as genai
 from groq import Groq
 from dotenv import load_dotenv
 
 # --- Configuration ---
+
 load_dotenv()
 MAX_ATTEMPTS = 3
 PARSERS_DIR = Path("custom_parsers")
 
 # --- API Initialization ---
+
 def initialize_clients() -> Dict[str, Any]:
     """Loads API keys and configures API clients."""
     gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -39,9 +40,9 @@ def initialize_clients() -> Dict[str, Any]:
     }
 
 class ParserAgent:
-    """
-    An agent that generates and validates PDF parsing code for bank statements.
-    """
+    
+    # An agent that generates and validates PDF parsing code for bank statements.
+
     def __init__(self, bank_name: str, preferred_backend: Optional[str]):
         """
         Initializes the agent with a target bank and AI backend.
@@ -218,7 +219,7 @@ Begin writing the code now.
         csv_content = self.csv_path.read_text(encoding="utf-8")
 
         for attempt in range(1, MAX_ATTEMPTS + 1):
-            print(f"\n🌀 Attempt {attempt}/{MAX_ATTEMPTS} using {self.backend}...")
+            print(f"\n☂️  Attempt {attempt}/{MAX_ATTEMPTS} using {self.backend}...")
             
             raw_script = self._generate_parser_script(csv_content)
             self._clean_and_write_script(raw_script, self.parser_path)
@@ -232,6 +233,8 @@ Begin writing the code now.
                     print("\nRetrying...\n")
 
         print(f"🚨 Failed to generate a passing parser after {MAX_ATTEMPTS} attempts.")
+
+
 
 
 def main():
