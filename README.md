@@ -17,14 +17,25 @@ The agent follows a simple yet powerful iterative loop. When you run it, it iden
 ### **The Generate-and-Test Loop**
 
 ```
-\[Start\] \-\> \[Generate Parser Code\] \-\> \[Run Pytest Contract\] \-\> \[Tests Pass?\]  
-   ^                                                              |  
-   |--(No, Retry)-- \[Self-Correct\] \<------------------------------+  
-   |  
- (Yes)  
-   |  
-   v  
-\[Finish: Parser Saved ✅\]
+[Start] 
+   |
+   v
+[Generate Parser Code]
+   |
+   v
+[Run Pytest Contract]
+   |
+   v
+[Tests Pass?] ----No----> [Self-Correct] 
+   |                          |
+   |                          v
+   +--------------------------+
+   |
+  Yes
+   |
+   v
+[Finish: Parser Saved ✅]
+
 
 ```
 
