@@ -1,32 +1,46 @@
-import pandas as pd
-from pdfplumber import pdf2calc
+import pdfplumber
 
-def extract_table(page):
-    tables = page.extract_tables()
-    if tables:
-        return tables[0]
-    else:
-        return None
+def parse_pdf(pdf_path: str) -> list[dict]:
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            text = ""
+            for page in pdf.pages:
+                text += page.extract_text()
 
-def extract_values(row):
-    return row if len(row) >= 6 else ['', '', '', '']
+            lines = text.splitlines()
+            transactions = []
+            transaction = {}
+            for line in lines:
+                parts = line.split()
+                if len(parts) > 3 and any(char.isdigit() for char in parts[0]):
+                    if transaction:
+                        transactions.append(transaction)
+                    transaction = {}
+                    try:
+                        transaction['Date'] = parts[0] + " " + parts[1]
+                        description_start = 2
+                        if parts[2].lower() in ['dr', 'cr']:
+                            description_start = 3
+                        transaction['Description'] = " ".join(parts[description_start:-2])
+                        if parts[-2].lower() == 'dr':
+                            transaction['Debit Amt'] = parts[-1]
+                            transaction['Credit Amt'] = ""
+                        elif parts[-2].lower() == 'cr':
+                            transaction['Credit Amt'] = parts[-1]
+                            transaction['Debit Amt'] = ""
+                        else:
+                            transaction['Debit Amt'] = ""
+                            transaction['Credit Amt'] = ""
+                        transaction['Balance'] = ""
 
-def parse(pdf_path: str) -> pd.DataFrame:
-    with pdfplumber.open(pdf_path) as pdf:
-        pages = list(pdf.pages)
-        if not pages:
-            return pd.DataFrame(columns=['Date', 'Description', 'Debit Amt', 'Credit Amt', 'Balance'])
-        
-        table = extract_table(pages[0])
-        if table is not None:
-            table = table[1:]
-            extracted_table = [extract_values(row) for row in table]
-            df = pd.DataFrame(extracted_table, columns=['Date', 'Description', 'Debit Amt', 'Credit Amt', 'Balance'])
-            df['Date'] = df['Date'].fillna("")
-            df['Description'] = df['Description'].fillna("")
-            df['Debit Amt'] = df['Debit Amt'].fillna("")
-            df['Credit Amt'] = df['Credit Amt'].fillna("")
-            df['Balance'] = df['Balance'].fillna("")
-            return df
-        else:
-            return pd.DataFrame(columns=['Date', 'Description', 'Debit Amt', 'Credit Amt', 'Balance'])
+                    except (IndexError, ValueError):
+                        pass
+
+            if transaction:
+                transactions.append(transaction)
+            return transactions
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
