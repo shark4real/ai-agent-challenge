@@ -24,7 +24,8 @@ The agent follows a simple yet powerful iterative loop. When you run it, it iden
    * **If the test fails**, the agent analyzes the failure, provides debug output, and returns to step 1 to generate a new, improved version. This loop continues until the parser passes or 3 attempts have been made.
 
  [Start] \-\> \[Generate Parser Code\] \-\> \[Run Pytest Contract\] \-\> \[Tests Pass?\]  
-   ^                                                                 |  
+   ^                                                                 |     
+   |                                                                 |  
    |--(No, Retry)-- \[Self-Correct\] \<------------------------------+  
    |  
  (Yes)  
