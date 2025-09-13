@@ -29,29 +29,15 @@ If the test passes, the agent's job is done. The valid parser is saved and ready
 
 If the test fails, the agent analyzes the failure, provides debug output, and returns to step 1 to generate a new, improved version. This loop continues until the parser passes or 3 attempts have been made.
 
-graph TD
-    subgraph "AutoParser AI Workflow"
-        A(Start) --> B{"Set Target Bank (e.g., ICICI)"};
-        B --> C[Step 1: Generate Python Code];
-        subgraph "AI Generation & Testing Loop (Max 3 Attempts)"
-            direction LR
-            C --> D["Step 2: Save Parser to `custom_parsers/`"];
-            D --> E["Step 3: Run `pytest` Validation"];
-            E --> F{Tests Pass?};
-        end
-        F -- Yes --> G([Success: Parser is Valid ✅]);
-        F -- No --> H{Attempts Left?};
-        H -- Yes --> I["Step 4: Analyze Failure & Self-Correct"];
-        I --> C;
-        H -- No --> J([Failure: Max Retries Reached 🚨]);
-    end
+[Start] -> [Generate Parser Code] -> [Run Pytest Contract] -> [Tests Pass?]
+   ^                                                             |
+   |--(No, Retry)-- [Self-Correct] <------------------------------+
+   |
+ (Yes)
+   |
+   v
+[Finish: Parser Saved ✅]
 
-    style A fill:#D5E8D4,stroke:#82B366,stroke-width:2px
-    style G fill:#D5E8D4,stroke:#82B366,stroke-width:2px
-    style J fill:#F8CECC,stroke:#B85450,stroke-width:2px
-    style C fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px
-    style E fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px
-    style I fill:#FFE6CC,stroke:#D79B00,stroke-width:2px
 
 In essence, the agent's core logic follows this cycle:
 
@@ -72,6 +58,7 @@ Get a local copy of the project.
 git clone [https://github.com/](https://github.com/)<your-username>/<your-repo-name>.git
 cd <your-repo-name>
 
+
 2. Create and Activate a Virtual Environment
 It's best practice to keep project dependencies isolated.
 
@@ -83,16 +70,19 @@ python -m venv venv
 python3 -m venv venv
 source venv/bin/activate
 
+
 3. Install Dependencies
 Install all the required Python packages from the requirements.txt file.
 
 pip install -r requirements.txt
+
 
 4. Configure Your API Keys
 The agent needs API keys to communicate with the AI backends.
 
 # Copy the example file
 cp .env.example .env
+
 
 Now, open the .env file with a text editor and paste in your secret keys for GEMINI_API_KEY and GROQ_API_KEY.
 
@@ -101,12 +91,14 @@ Execute the agent from the command line, using the --target flag to specify whic
 
 python agent.py --target icici
 
+
 The agent will now begin its autonomous loop. You can replace icici with any other bank name that has a corresponding sample folder in /data.
 
 🧪 Testing
 While the agent runs tests automatically, you can also run them manually on any existing parser.
 
 pytest
+
 
 A successful run will show that all tests passed for the available parsers.
 
@@ -123,3 +115,4 @@ A successful run will show that all tests passed for the available parsers.
 ├── .env.example             # Template for API keys
 ├── requirements.txt         # Project dependencies
 └── README.md
+
